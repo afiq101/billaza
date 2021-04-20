@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('./partials/header.ejs') %>
+  <style>
+    .tabx {
+      opacity: 0;
+      visibility: hidden;
+      transform: translate(0, 50px);
+    }
+    /* 
+    .active-tab,
+    .active-button {
+      transition: transform 0.1s, background 0.1s, color 0.2s;
+    } */
+
+    .active-tab {
+      visibility: visible;
+      opacity: 1;
+      transform: translate(0, 0);
+      z-index: 99;
+    }
+    .active-button {
+      background: #7c3aed !important;
+      color: white;
+    }
+  </style>
+  <body>
+    <%- include('./partials/nav.ejs') %>
+    <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+      <div id="app" class="content">
+        <h1 class="text-2xl font-medium mb-5">Manage Media</h1>
+        <div class="tabs mx-auto text-purple-500 m-10" style="padding: 0px">
+          <div class="top flex text-purple-500 rounded-t-md overflow-hidden">
+            <div class="header w-full uppercase">
+              <div class="buttons mr-auto my-auto flex">
+                <span
+                  tab="1"
+                  class="btn bg-white font-medium cursor-pointer p-3 px-5 active-button"
+                  >Url Path</span
+                >
+                <span
+                  tab="2"
+                  class="btn bg-white font-medium cursor-pointer p-3 px-5 rounded-tr-xl"
+                  >Blob</span
+                >
+              </div>
+            </div>
+          </div>
+          <div class="center text-gray-800 relative">
+            <!------------------------------------------ NORMAL PATHING ---------------------------------------------->
+            <div
+              class="tabx bg-white rounded-b-md w-full absolute top-0 active-tab"
+            >
+              <div class="container mx-auto bg-white p-8 rounded-lg shadow-md">
+                <form
+                  action="api/media/upload"
+                  enctype="multipart/form-data"
+                  method="post"
+                >
+                  <h2 class="text-xl font-medium mb-5 text-gray-500">
+                    URL Path
+                  </h2>
+                  <div
+                    class="container mb-16"
+                    id="preview-con"
+                    style="height: 300px; display: none"
+                  >
+                    <h2 class="text-xl font-medium mb-5 text-gray-500">
+                      Preview
+                    </h2>
+                    <center>
+                      <img
+                        src=""
+                        id="imageprev"
+                        width="300"
+                        class="myImg2"
+                        style="display: none"
+                        alt=""
+                      />
+                      <video
+                        style="display: none"
+                        width="500"
+                        id="video-con"
+                        controls
+                      >
+                        <source src="" id="videoprev" type="video/mp4" />
+                      </video>
+                      <audio
+                        style="display: none"
+                        width="300"
+                        id="audio-con"
+                        controls
+                      >
+                        <source src="" id="audioprev" type="audio/mp3" />
+                      </audio>
+                    </center>
+                  </div>
+                  <br />
+
+                  <div class="grid grid-cols-2 gap-4">
+                    <input
+                      type="text"
+                      placeholder="File Name (Leave blank for default file name)"
+                      class="px-3 py-3 text-blueGray-600 relative bg-white bg-white rounded text-sm border-2 border-gray-200 outline-none focus:outline-none focus:border-purple-500 w-full mb-5"
+                      name="filename"
+                      id="filename"
+                    />
+                    <input
+                      type="file"
+                      class="px-3 py-3 text-blueGray-600 relative bg-white bg-white rounded text-sm border-2 border-gray-200 outline-none focus:outline-none focus:border-purple-500 w-full mb-5"
+                      name="upload_media"
+                      id="upload_media"
+                    />
+                  </div>
+
+                  <button
+                    class="py-2 px-4 mt-2 float-right font-medium rounded-lg shadow-md text-white bg-purple-500 hover:bg-purple-700"
+                  >
+                    Save Media
+                  </button>
+                </form>
+
+                <br />
+
+                <div class="w-full my-16">
+                  <div class="shadow-md">
+                    <div class="tab w-full overflow-hidden border-t">
+                      <input
+                        class="absolute opacity-0"
+                        id="tab1-single-one"
+                        type="radio"
+                        name="tabs2"
+                      />
+                      <label
+                        class="block p-5 leading-normal cursor-pointer"
+                        for="tab1-single-one"
+                        >Image</label
+                      >
+                      <div
+                        class="tab-content overflow-hidden border-l-2 bg-gray-100 border-indigo-500 leading-normal"
+                      >
+                        <div class="grid grid-cols-5 gap-1">
+                          <div
+                            v-for="datamedia in media"
+                            class="mt-3 px-2 relative"
+                            v-if="datamedia.type == 'image' && datamedia.buffer == null"
+                          >
+                            <div class="cover">
+                              <img
+                                :src="'../' + datamedia.pathurl"
+                                class="myImg"
+                                width="200"
+                                alt=""
+                              />
+                              <span class="mt-2">{{ datamedia.name }}</span>
+                            </div>
+                            <br />
+                            <div
+                              class="text-gray-400 absolute bottom-0 right-0"
+                            >
+                              &nbsp;&nbsp;<i
+                                v-on:click="deletemedia(datamedia.media_id)"
+                                class="fas fa-trash-alt btnicon"
+                              ></i>
+                            </div>
+                            <div
+                              class="text-gray-400 absolute bottom-0 right-0"
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="tab w-full overflow-hidden border-t">
+                      <input
+                        class="absolute opacity-0"
+                        id="tab1-single-two"
+                        type="radio"
+                        name="tabs2"
+                      />
+                      <label
+                        class="block p-5 leading-normal cursor-pointer"
+                        for="tab1-single-two"
+                        >Video</label
+                      >
+                      <div
+                        class="tab-content overflow-hidden border-l-2 bg-gray-100 border-indigo-500 leading-normal"
+                      >
+                        <div class="grid grid-cols-3 gap-1">
+                          <div
+                            v-for="datamedia in media"
+                            class="mt-3 px-2 relative"
+                            v-if="datamedia.type == 'video' && datamedia.buffer == null"
+                          >
+                            <!-- {{datamedia}} -->
+                            <div class="cover">
+                              <video controls>
+                                <source
+                                  :src="'../' + datamedia.pathurl"
+                                  type="video/mp4"
+                                />
+                              </video>
+                              <span class="mt-2">{{ datamedia.name }}</span>
+                            </div>
+                            <br />
+                            <div
+                              class="text-gray-400 absolute bottom-0 right-0"
+                            >
+                              &nbsp;&nbsp;<i
+                                v-on:click="deletemedia(datamedia.media_id)"
+                                class="fas fa-trash-alt btnicon"
+                              ></i>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="tab w-full overflow-hidden border-t">
+                      <input
+                        class="absolute opacity-0"
+                        id="tab1-single-three"
+                        type="radio"
+                        name="tabs2"
+                      />
+                      <label
+                        class="block p-5 leading-normal cursor-pointer"
+                        for="tab1-single-three"
+                        >Audio</label
+                      >
+                      <div
+                        class="tab-content overflow-hidden border-l-2 bg-gray-100 border-indigo-500 leading-normal"
+                      >
+                        <div class="grid grid-cols-3 gap-1">
+                          <div
+                            v-for="datamedia in media"
+                            class="mt-3 px-2 relative"
+                            v-if="datamedia.type == 'audio' && datamedia.buffer == null"
+                          >
+                            <!-- {{datamedia}} -->
+                            <div class="cover">
+                              <audio controls>
+                                <source
+                                  :src="'../' + datamedia.pathurl"
+                                  type="audio/mp3"
+                                />
+                              </audio>
+                              <span class="mt-2 pl-4">{{
+                                datamedia.name
+                              }}</span>
+                            </div>
+                            <br />
+                            <div
+                              class="text-gray-400 absolute bottom-0 right-0"
+                            >
+                              &nbsp;&nbsp;<i
+                                v-on:click="deletemedia(datamedia.media_id)"
+                                class="fas fa-trash-alt btnicon"
+                              ></i>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="tab w-full overflow-hidden border-t">
+                      <input
+                        class="absolute opacity-0"
+                        id="tab1-single-four"
+                        type="radio"
+                        name="tabs2"
+                      />
+                      <label
+                        class="block p-5 leading-normal cursor-pointer"
+                        for="tab1-single-four"
+                        >Document</label
+                      >
+                      <div
+                        class="tab-content overflow-hidden border-l-2 bg-gray-100 border-indigo-500 leading-normal"
+                      >
+                        <div class="grid grid-cols-2 gap-1">
+                          <div
+                            v-for="datamedia in media"
+                            class="mt-3 px-2 relative"
+                            v-if="datamedia.type == 'application' && datamedia.buffer == null"
+                          >
+                            <div class="cover">
+                              <iframe
+                                v-if="datamedia.format == 'pdf'"
+                                height="600"
+                                style="width: 100%"
+                                :src="'../'+datamedia.pathurl"
+                                allowfullscreen
+                                webkitallowfullscreen
+                              ></iframe>
+                              <iframe
+                                v-if="datamedia.format == 'vnd.openxmlformats-officedocument.wordprocessingml.document'"
+                                :src="'http://docs.google.com/gview?url=http://localhost:3000/'+datamedia.pathurl+'&embedded=true'"
+                                height="600"
+                                style="width: 100%"
+                                frameborder="0"
+                                >This is an embedded
+                                <a target="_blank" href="http://office.com"
+                                  >Microsoft Office</a
+                                >
+                                document, powered by
+                                <a
+                                  target="_blank"
+                                  href="http://office.com/webapps"
+                                  >Office Online</a
+                                >.</iframe
+                              >
+                              <span class="mt-2">{{ datamedia.name }}</span>
+                            </div>
+                            <br />
+                            <div
+                              class="text-gray-400 absolute bottom-0 right-0"
+                            >
+                              &nbsp;&nbsp;<i
+                                v-on:click="deletemedia(datamedia.media_id)"
+                                class="fas fa-trash-alt btnicon"
+                              ></i>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!------------------------------------------ USING BLOB --------------------------------------------------->
+
+            <div class="tabx bg-white rounded-b-md w-full absolute top-0">
+              <div class="container mx-auto bg-white p-8 rounded-lg shadow-md">
+                <form
+                  action="api/media/uploadblob"
+                  enctype="multipart/form-data"
+                  method="post"
+                >
+                  <h2 class="text-xl font-medium mb-5 text-gray-500">BLOB</h2>
+                  <div
+                    class="container mb-16"
+                    id="preview-con2"
+                    style="height: 300px; display: none"
+                  >
+                    <h2 class="text-xl font-medium mb-5 text-gray-500">
+                      Preview
+                    </h2>
+                    <center>
+                      <img
+                        src=""
+                        id="imageprev2"
+                        width="300"
+                        class="myImg2"
+                        style="display: none"
+                        alt=""
+                      />
+                      <video
+                        style="display: none"
+                        width="500"
+                        id="video-con2"
+                        controls
+                      >
+                        <source src="" id="videoprev2" type="video/mp4" />
+                      </video>
+                      <audio
+                        style="display: none"
+                        width="300"
+                        id="audio-con2"
+                        controls
+                      >
+                        <source src="" id="audioprev2" type="audio/mp3" />
+                      </audio>
+                    </center>
+                  </div>
+                  <br />
+                  <!-- <h2 class="text-xl font-medium mb-5 text-gray-500">BLOB</h2> -->
+                  <div class="grid grid-cols-2 gap-4">
+                    <input
+                      type="text"
+                      placeholder="File Name (Leave blank for default file name)"
+                      class="px-3 py-3 text-blueGray-600 relative bg-white bg-white rounded text-sm border-2 border-gray-200 outline-none focus:outline-none focus:border-purple-500 w-full mb-5"
+                      name="filename_blob"
+                      id="filename_blob"
+                    />
+                    <input
+                      type="file"
+                      class="px-3 py-3 text-blueGray-600 relative bg-white bg-white rounded text-sm border-2 border-gray-200 outline-none focus:outline-none focus:border-purple-500 w-full mb-5"
+                      name="upload_media_blob"
+                      id="upload_media_blob"
+                    />
+                  </div>
+
+                  <button
+                    class="py-2 px-4 mt-2 float-right font-medium rounded-lg shadow-md text-white bg-purple-500 hover:bg-purple-700"
+                  >
+                    Save Media
+                  </button>
+                </form>
+
+                <br />
+
+                <div class="w-full my-16">
+                  <div class="shadow-md">
+                    <div class="tab w-full overflow-hidden border-t">
+                      <input
+                        class="absolute opacity-0"
+                        id="tab2-single-one"
+                        type="radio"
+                        name="tabs3"
+                      />
+                      <label
+                        class="block p-5 leading-normal cursor-pointer"
+                        for="tab2-single-one"
+                        >Image</label
+                      >
+                      <div
+                        class="tab-content overflow-hidden border-l-2 bg-gray-100 border-indigo-500 leading-normal"
+                      >
+                        <div class="grid grid-cols-5 gap-1">
+                          <div
+                            v-for="datamedia in media"
+                            class="mt-3 px-2 relative"
+                            v-if="datamedia.type == 'image' && datamedia.buffer != null"
+                          >
+                            <div class="cover">
+                              <img
+                                :src="'data:image/'+ datamedia.format + ';base64,' + datamedia.buffer"
+                                class="myImg"
+                                width="200"
+                                alt=""
+                              />
+                              <span class="mt-2">{{ datamedia.name }}</span>
+                            </div>
+                            <br />
+                            <div
+                              class="text-gray-400 absolute bottom-0 right-0"
+                            >
+                              &nbsp;&nbsp;<i
+                                v-on:click="deletemedia(datamedia.media_id)"
+                                class="fas fa-trash-alt btnicon"
+                              ></i>
+                            </div>
+                            <div
+                              class="text-gray-400 absolute bottom-0 right-0"
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="tab w-full overflow-hidden border-t">
+                      <input
+                        class="absolute opacity-0"
+                        id="tab2-single-two"
+                        type="radio"
+                        name="tabs3"
+                      />
+                      <label
+                        class="block p-5 leading-normal cursor-pointer"
+                        for="tab2-single-two"
+                        >Video</label
+                      >
+                      <div
+                        class="tab-content overflow-hidden border-l-2 bg-gray-100 border-indigo-500 leading-normal"
+                      >
+                        <div class="grid grid-cols-3 gap-1">
+                          <div
+                            v-for="datamedia in media"
+                            class="mt-3 px-2 relative"
+                            v-if="datamedia.type == 'video' && datamedia.buffer != null"
+                          >
+                            <!-- {{datamedia}} -->
+                            <div class="cover">
+                              <video controls>
+                                <source
+                                  :src="'data:video/'+ datamedia.format + ';base64,' + datamedia.buffer"
+                                  type="video/mp4"
+                                />
+                              </video>
+                              <span class="mt-2">{{ datamedia.name }}</span>
+                            </div>
+                            <br />
+                            <div
+                              class="text-gray-400 absolute bottom-0 right-0"
+                            >
+                              &nbsp;&nbsp;<i
+                                v-on:click="deletemedia(datamedia.media_id)"
+                                class="fas fa-trash-alt btnicon"
+                              ></i>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="tab w-full overflow-hidden border-t">
+                      <input
+                        class="absolute opacity-0"
+                        id="tab2-single-three"
+                        type="radio"
+                        name="tabs3"
+                      />
+                      <label
+                        class="block p-5 leading-normal cursor-pointer"
+                        for="tab2-single-three"
+                        >Audio</label
+                      >
+                      <div
+                        class="tab-content overflow-hidden border-l-2 bg-gray-100 border-indigo-500 leading-normal"
+                      >
+                        <div class="grid grid-cols-3 gap-1">
+                          <div
+                            v-for="datamedia in media"
+                            class="mt-3 px-2 relative"
+                            v-if="datamedia.type == 'audio' && datamedia.buffer != null"
+                          >
+                            <!-- {{datamedia}} -->
+                            <div class="cover">
+                              <audio autobuffer="autobuffer" controls>
+                                <source
+                                  :src="'data:audio/'+ datamedia.format + ';base64,' + datamedia.buffer"
+                                  type="audio/mp3"
+                                />
+                              </audio>
+                              <span class="mt-2 pl-4">{{
+                                datamedia.name
+                              }}</span>
+                            </div>
+                            <br />
+                            <div
+                              class="text-gray-400 absolute bottom-0 right-0"
+                            >
+                              &nbsp;&nbsp;<i
+                                v-on:click="deletemedia(datamedia.media_id)"
+                                class="fas fa-trash-alt btnicon"
+                              ></i>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="tab w-full overflow-hidden border-t">
+                      <input
+                        class="absolute opacity-0"
+                        id="tab2-single-four"
+                        type="radio"
+                        name="tabs3"
+                      />
+                      <label
+                        class="block p-5 leading-normal cursor-pointer"
+                        for="tab2-single-four"
+                        >Document</label
+                      >
+                      <div
+                        class="tab-content overflow-hidden border-l-2 bg-gray-100 border-indigo-500 leading-normal"
+                      >
+                        <div class="grid grid-cols-2 gap-1">
+                          <div
+                            v-for="datamedia in media"
+                            class="mt-3 px-2 relative"
+                            v-if="datamedia.type == 'application' && datamedia.buffer != null"
+                          >
+                            <div class="cover">
+                              <iframe
+                                v-if="datamedia.format == 'pdf'"
+                                height="600"
+                                style="width: 100%"
+                                :src="'data:application/'+ datamedia.format + ';base64,' + datamedia.buffer"
+                                allowfullscreen
+                                webkitallowfullscreen
+                              ></iframe>
+                              <span class="mt-2">{{ datamedia.name }}</span>
+                            </div>
+                            <br />
+                            <div
+                              class="text-gray-400 absolute bottom-0 right-0"
+                            >
+                              &nbsp;&nbsp;<i
+                                v-on:click="deletemedia(datamedia.media_id)"
+                                class="fas fa-trash-alt btnicon"
+                              ></i>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="editmod" class="modal">
+        <p>Thanks for clicking. That felt good.</p>
+        <a href="#" rel="modal:close">Close</a>
+      </div>
+    </div>
+    <%- include('./partials/footer.ejs') %>
+    <script>
+      var app = new Vue({
+        el: "#app",
+        data: {
+          project_title: "Media Manager",
+          media: [],
+        },
+        mounted() {
+          axios.get("../api/media/getmedia").then((res) => {
+            console.log(res.data);
+            if (res.data.length != 0) {
+              for (let i = 0; i < res.data.length; i++) {
+                this.media.push(res.data[i]);
+              }
+            }
+          });
+        },
+        methods: {
+          deletemedia: function (mediaid) {
+            swal({
+              title: "Are you sure?",
+              text:
+                "Once deleted, you will not be able to recover this media file!",
+              icon: "warning",
+              buttons: true,
+              dangerMode: true,
+            }).then((willDelete) => {
+              if (willDelete) {
+                axios
+                  .post("../api/media/deletemedia", { mediaid })
+                  .then((res) => {
+                    console.log(res);
+                    if (res.status == 200) {
+                      swal({
+                        title: "Deleted!",
+                        text: "Data has been successfully saved!",
+                        icon: "success",
+                      }).then(function () {
+                        location.reload();
+                        return false;
+                      });
+                    }
+                  });
+              }
+            });
+          },
+        },
+      });
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const success = urlParams.get("success");
+      if (success == "true") {
+        swal({
+          title: "Success!",
+          text: "Data has been successfully saved!",
+          icon: "success",
+        });
+      }
+
+      const root = document.querySelector(".tabs"),
+        tabs = root.querySelectorAll(".tabx"),
+        btns = root.querySelectorAll(".btn");
+      root.onclick = function (e) {
+        var t = e.target,
+          val = t.getAttribute("tab");
+        if (val != null) {
+          tabs.forEach((each) => {
+            each.classList.remove("active-tab");
+          });
+          btns.forEach((each) => {
+            each.classList.remove("active-button");
+          });
+          tabs[val - 1].classList.add("active-tab");
+          btns[val - 1].classList.add("active-button");
+        }
+      };
+
+      $("#upload_media").change(function () {
+        readURL(this);
+      });
+
+      $("#upload_media_blob").change(function () {
+        readURLblob(this);
+      });
+
+      function readURL(input) {
+        if (input.files && input.files[0]) {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            // $("#blah").attr("src", e.target.result);
+            var split = reader.result.split(";");
+            var arrStr = split[0].split(/[:/]/);
+            console.log(arrStr[1]);
+            if (arrStr[1] == "image") {
+              $("#imageprev").attr("src", e.target.result);
+              $("#preview-con").css("display", "block");
+              $("#imageprev").css("display", "block");
+              $("#video-con").css("display", "none");
+              $("#audio-con").css("display", "none");
+            } else if (arrStr[1] == "video") {
+              $("#videoprev").attr("src", e.target.result);
+              $("#preview-con").css("display", "block");
+              $("#imageprev").css("display", "none");
+              $("#video-con").css("display", "block");
+              $("#audio-con").css("display", "none");
+              $("#video-con")[0].load();
+            } else if (arrStr[1] == "audio") {
+              $("#audioprev").attr("src", e.target.result);
+              $("#preview-con").css("display", "block");
+              $("#imageprev").css("display", "none");
+              $("#video-con").css("display", "none");
+              $("#audio-con").css("display", "block");
+              $("#audio-con")[0].load();
+            }
+          };
+          reader.readAsDataURL(input.files[0]); // convert to base64 string
+          // console.(reader.readAsDataURL(input.files[0]))
+        }
+      }
+
+      function readURLblob(input) {
+        if (input.files && input.files[0]) {
+          var reader = new FileReader();
+          reader.onload = function (e) {
+            // $("#blah").attr("src", e.target.result);
+            var split = reader.result.split(";");
+            var arrStr = split[0].split(/[:/]/);
+            console.log(arrStr[1]);
+            if (arrStr[1] == "image") {
+              $("#imageprev2").attr("src", e.target.result);
+              $("#preview-con2").css("display", "block");
+              $("#imageprev2").css("display", "block");
+              $("#video-con2").css("display", "none");
+              $("#audio-con2").css("display", "none");
+            } else if (arrStr[1] == "video") {
+              $("#videoprev2").attr("src", e.target.result);
+              $("#preview-con2").css("display", "block");
+              $("#imageprev2").css("display", "none");
+              $("#video-con2").css("display", "block");
+              $("#audio-con2").css("display", "none");
+              $("#video-con2")[0].load();
+            } else if (arrStr[1] == "audio") {
+              $("#audioprev2").attr("src", e.target.result);
+              $("#preview-con2").css("display", "block");
+              $("#imageprev2").css("display", "none");
+              $("#video-con2").css("display", "none");
+              $("#audio-con2").css("display", "block");
+              $("#audio-con2")[0].load();
+            }
+          };
+          reader.readAsDataURL(input.files[0]); // convert to base64 string
+          // console.(reader.readAsDataURL(input.files[0]))
+        }
+      }
+
+      /* Optional Javascript to close the radio button version by clicking it again */
+      var myRadios = document.getElementsByName("tabs2");
+      var setCheck;
+      var x = 0;
+      for (x = 0; x < myRadios.length; x++) {
+        myRadios[x].onclick = function () {
+          if (setCheck != this) {
+            setCheck = this;
+          } else {
+            this.checked = false;
+            setCheck = null;
+          }
+        };
+      }
+
+      var myRadios = document.getElementsByName("tabs3");
+      var setCheck;
+      var x = 0;
+      for (x = 0; x < myRadios.length; x++) {
+        myRadios[x].onclick = function () {
+          if (setCheck != this) {
+            setCheck = this;
+          } else {
+            this.checked = false;
+            setCheck = null;
+          }
+        };
+      }
+    </script>
+
+    <% if(locals.status){ if(status == "200"){ %>
+    <script>
+      swal({
+        title: "Success!",
+        text: "Data has been successfully saved!",
+        icon: "success",
+      });
+    </script>
+    <% } } %>
+  </body>
+</html>
